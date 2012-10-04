@@ -14,7 +14,7 @@ import java.util.Random;
  * @author Tobias Persson
  */
 public class PokerClient extends PokerClientBase {
-    private String name;
+    private String name = "AceOfSpades";
     private Random random = new Random();
     private Hand hand;
     
