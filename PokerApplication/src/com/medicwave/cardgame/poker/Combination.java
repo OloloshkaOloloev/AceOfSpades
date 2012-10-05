@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.medicwave.cardgame.poker;
 
 import ca.ualberta.cs.poker.Card;
@@ -98,4 +99,52 @@ public class Combination {
     public int getSecondCombinationValue() {
         return secondCombinationValue;
     }
+=======
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+package com.medicwave.cardgame.poker;
+
+
+/**
+ *
+ * @author edutarascon
+ */
+public class Combination {
+    
+    private String comb;
+    private boolean[] mask; // True useful card False draw
+    private int  higher_car;
+    
+    public Combination(String comb){
+        this.comb = comb;
+        
+    }
+    
+    public void Pair(){
+        comb = "Pair";
+    }
+    
+    public void PairKicker(){
+        comb = "Pair&Kicker";
+    }
+    
+    public void ProjectStraight()
+    {
+        comb = "";
+    }
+    
+    public void ProjectFlush(){
+    
+    }
+    
+    public void ProjectRoyalFlush(){
+    
+    }
+    
+    public void HigherCard()
+
+>>>>>>> Books
 }
