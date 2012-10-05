@@ -29,6 +29,7 @@ public class Combination {
     public static final String PROJECT_STRAIGHT_FLUSH = "ProjStrFlush";
     public static final String PROJECT_FLUSH = "ProjFlush";
     public static final String PROJECT_STRAIGHT = "ProjStraight";
+    public static final String PAIR_WITH_KICKER = "PairWithKicker";
     
     // =========================================================================
     // Fields

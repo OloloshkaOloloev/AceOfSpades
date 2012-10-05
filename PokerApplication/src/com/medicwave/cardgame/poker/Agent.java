@@ -15,6 +15,7 @@ public class Agent {
     // =========================================================================
 
     private Hand agentHand;
+    private boolean round;
     // For open action
     private int minimumPotAfterOpen = -1;
     // For raise action
