@@ -98,4 +98,8 @@ public class Combination {
     public int getSecondCombinationValue() {
         return secondCombinationValue;
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> parent of 4f80baf... Books
