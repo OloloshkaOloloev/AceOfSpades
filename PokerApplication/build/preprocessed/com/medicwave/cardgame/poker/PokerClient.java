@@ -202,6 +202,11 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoCardsInHand(Hand hand) {
         notifyTextReceivers("The cards in hand is" + hand + ".");
+        Card card = hand.getCard(1);
+        int index = card.getIndex();
+        int rank = Card.getRank(index);
+        int suit = Card.getSuit(index);
+        int[] cards = hand.getCardArray();
         this.hand = hand;
     }
 

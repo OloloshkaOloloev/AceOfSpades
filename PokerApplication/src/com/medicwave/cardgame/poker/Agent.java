@@ -10,6 +10,7 @@ import com.medicwave.cardgame.poker.PokerClientBase.BettingAnswer;
  * @author Evgeny Kubrakov, Edu Tarascon
  */
 public class Agent {
+   
     // =========================================================================
     // Fields
     // =========================================================================
@@ -95,9 +96,8 @@ public class Agent {
      * @param hand - 5 cards that were taken
      * @return Combination object
      */
-    private Combination findBestCombination(Hand hand) {
-        // TODO
-        return null;
+    public Combination findBestCombination(Hand hand) {
+        return new Combination(hand);
     }
 
     /**
@@ -106,7 +106,7 @@ public class Agent {
      * @param combination - object is a result of findBestCombination method
      * @return Float value of probable win with given combination
      */
-    private float calculateProbabilityOfWin(Combination combination) {
+    public float calculateProbabilityOfWin(Combination combination) {
         // TODO
         return Float.MIN_VALUE;
     }
