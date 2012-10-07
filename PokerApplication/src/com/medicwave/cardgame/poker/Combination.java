@@ -19,28 +19,28 @@ public class Combination {
     // =========================================================================
     // Constants
     // =========================================================================
-    public static final String ROYAL_FLUSH = "RoyalFlush";
-    public static final String STRAIGHT_FLUSH = "StraightFlush";
-    public static final String FOUR_OF_A_KIND = "FourOfAKind";
-    public static final String FULL_HOUSE = "FullHouse";
-    public static final String FLUSH = "Flush";
-    public static final String STRAIGHT = "Straight";
-    public static final String THREE_OF_A_KIND = "ThreeOfAKind";
-    public static final String TWO_PAIR = "TwoPair";
-    public static final String PAIR_WITH_KICKER = "PairWithKicker";
-    public static final String ONE_PAIR = "OnePair";
-    public static final String PROJECT_ROYAL_FLUSH = "ProjRoaylFlush";
-    public static final String PROJECT_STRAIGHT_FLUSH = "ProjStrFlush";
-    public static final String PROJECT_FLUSH = "ProjFlush";
-    public static final String PROJECT_STRAIGHT = "ProjStraight";
-    public static final String HIGH_CARD = "HighCard/Nothing";
+    public static final int ROYAL_FLUSH = 0;
+    public static final int STRAIGHT_FLUSH = 1;
+    public static final int FOUR_OF_A_KIND = 2;
+    public static final int FULL_HOUSE = 3;
+    public static final int FLUSH = 4;
+    public static final int STRAIGHT = 5;
+    public static final int THREE_OF_A_KIND = 6;
+    public static final int TWO_PAIR = 7;
+    public static final int ONE_PAIR = 8;
+    public static final int HIGH_CARD = 9;
+    public static final int PROJECT_STRAIGHT_OPEN = 10;
+    public static final int PROJECT_STRAIGHT_INSIDE = 11;
+    public static final int PROJECT_FLUSH_THREE = 12;
+    public static final int PROJECT_FLUSH_FOUR = 13;
+    public static final int PAIR_WITH_KICKER = 14;
     public static final int FIVE_CARDS_POKER = 5;
     public static final int VALUE = 0;
     public static final int POSITION = 1;
     // =========================================================================
     // Fields
     // =========================================================================
-    private String combinationName;
+    private int combinationName;
     private boolean[] mask;
     private int theHighestCardValue;
     private int theHighestCardValuePos;
@@ -224,7 +224,7 @@ public class Combination {
         firstCombinationValue = secondCombinationValue == Card.ACE ? secondCombinationValue : secondCombinationValue + 1;
         // Setting mask accodring to in what half the project of straight
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_STRAIGHT;
+        combinationName = PROJECT_STRAIGHT_OPEN;
     }
 
     /**
@@ -246,7 +246,7 @@ public class Combination {
         firstCombinationValue = Card.ACE;
         // Setting mask accodring to in what half the project of flush
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_FLUSH;
+        combinationName = PROJECT_FLUSH_FOUR;
     }
 
     /**
@@ -283,7 +283,7 @@ public class Combination {
         firstCombinationValue = secondCombinationValue == Card.ACE ? secondCombinationValue : secondCombinationValue + 1;
         // Setting mask accodring to in what half the project of straight flush
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_STRAIGHT_FLUSH;
+        combinationName = PROJECT_STRAIGHT_OPEN;
     }
 
     /**
@@ -321,7 +321,7 @@ public class Combination {
             firstCombinationValue = Card.ACE;
             // Setting mask accodring to in what half the project of straight flush
             mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-            combinationName = PROJECT_STRAIGHT_FLUSH;
+            combinationName = PROJECT_STRAIGHT_OPEN;
         }
     }
 
@@ -455,6 +455,31 @@ public class Combination {
      * firstCombinationValue, secondCombinationValue
      */
     private void checkFullHouse() {
+        boolean isThreeFound = false;
+        boolean isTwoFound = false;
+        int tempFirstValue = Integer.MIN_VALUE;
+        int tempSecondValue = Integer.MIN_VALUE;
+        for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
+            if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])) {
+                if (!isThreeFound) {
+                    if (i + 2 < FIVE_CARDS_POKER) {
+                        if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 2])) {
+                            if (tempFirstValue > Integer.MIN_VALUE) {
+                            }
+                            isThreeFound = true;
+                        } else {
+                            isTwoFound = true;
+                        }
+                    }
+                } else if (!isTwoFound) {
+                    isTwoFound = true;
+                }
+            }
+        }
+        if (isThreeFound && isTwoFound) {
+            mask = new boolean[]{true, true, true, true, true};
+            combinationName = FULL_HOUSE;
+        }
     }
 
     /**
@@ -505,7 +530,7 @@ public class Combination {
     /**
      * @return the combinationName
      */
-    public String getCombinationName() {
+    public int getCombinationName() {
         return combinationName;
     }
 
