@@ -61,12 +61,11 @@ public class Combination {
      * @param hand
      */
     public Combination(Hand hand) {
-        // Getting array of cards from the hand
-        cards = hand.getCardArray();
+        this.cards = new int[FIVE_CARDS_POKER];
 
         // Ordering cards in the right way
         for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            cards[i] = cards[i + 1];
+            this.cards[i] = cards[i + 1];
         }
 
         // Initializing highest value
@@ -84,11 +83,6 @@ public class Combination {
      */
     public Combination(int[] cards) {
         this.cards = cards;
-        String cardsStr = new String();
-        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            cardsStr += Card.getRankChar(cards[i]) + Card.getSuit(cards[i]) + " ";
-        }
-        System.out.println(cardsStr);
         if (cards.length == 5) {
             calculateValues(cards);
         }

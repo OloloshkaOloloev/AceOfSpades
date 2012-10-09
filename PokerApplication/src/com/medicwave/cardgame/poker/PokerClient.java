@@ -54,7 +54,7 @@ public class PokerClient extends PokerClientBase {
         testCases = new int[][]{{34, 21, 41, 28, 1}, {44, 32, 47, 35, 13}, {30, 18, 45, 33, 1}, {40, 47, 51, 10, 11}, {41, 39, 46, 47, 48}, {12, 14, 30, 17, 48}};
         // Start testing
         for (int i = 0; i < 8; i++) {
-            Combination combination = new Combination(testCases[i]);
+            Agent agent = new Agent(testCases[i]);
         }
     }
 
