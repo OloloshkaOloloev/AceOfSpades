@@ -19,36 +19,38 @@ public class Combination {
     // =========================================================================
     // Constants
     // =========================================================================
-    public static final String ROYAL_FLUSH = "RoyalFlush";
-    public static final String STRAIGHT_FLUSH = "StraightFlush";
-    public static final String FOUR_OF_A_KIND = "FourOfAKind";
-    public static final String FULL_HOUSE = "FullHouse";
-    public static final String FLUSH = "Flush";
-    public static final String STRAIGHT = "Straight";
-    public static final String THREE_OF_A_KIND = "ThreeOfAKind";
-    public static final String TWO_PAIR = "TwoPair";
-    public static final String PAIR_WITH_KICKER = "PairWithKicker";
-    public static final String ONE_PAIR = "OnePair";
-    public static final String PROJECT_ROYAL_FLUSH = "ProjRoaylFlush";
-    public static final String PROJECT_STRAIGHT_FLUSH = "ProjStrFlush";
-    public static final String PROJECT_FLUSH = "ProjFlush";
-    public static final String PROJECT_STRAIGHT = "ProjStraight";
-    public static final String HIGH_CARD = "HighCard/Nothing";
+    public static final int ROYAL_FLUSH = 0;
+    public static final int STRAIGHT_FLUSH = 1;
+    public static final int FOUR_OF_A_KIND = 2;
+    public static final int FULL_HOUSE = 3;
+    public static final int FLUSH = 4;
+    public static final int STRAIGHT = 5;
+    public static final int THREE_OF_A_KIND = 6;
+    public static final int TWO_PAIR = 7;
+    public static final int ONE_PAIR = 8;
+    public static final int HIGH_CARD = 9;
+    public static final int PROJECT_STRAIGHT_OPEN = 10;
+    public static final int PROJECT_STRAIGHT_INSIDE = 11;
+    public static final int PROJECT_FLUSH_THREE = 12;
+    public static final int PROJECT_FLUSH_FOUR = 13;
+    public static final int PAIR_WITH_KICKER = 14;
     public static final int FIVE_CARDS_POKER = 5;
     public static final int VALUE = 0;
     public static final int POSITION = 1;
     // =========================================================================
     // Fields
     // =========================================================================
-    private String combinationName;
-    private boolean[] mask;
+    private int combinationName;
+    private boolean[] mask = {false, false, false, false, false};
     private int theHighestCardValue;
     private int theHighestCardValuePos;
     private int firstCombinationValue;
     private int secondCombinationValue;
-    private int[] sortedByRank;
-    private int[] sortedByRankAndSuit;
-    private int[] cards;
+    private int[] sortedByRank = new int[5];
+    private int[] sortedByRankAndSuit = new int[5];
+    private int[] cards = new int[5];
+    private String strRank = "";
+    private String strRankSuit = "";
 
     // =========================================================================
     // Constructors
@@ -81,6 +83,12 @@ public class Combination {
      * @param cards - 5-items array with indexes of cards
      */
     public Combination(int[] cards) {
+        this.cards = cards;
+        String cardsStr = new String();
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            cardsStr += Card.getRankChar(cards[i]) + Card.getSuit(cards[i]) + " ";
+        }
+        System.out.println(cardsStr);
         if (cards.length == 5) {
             calculateValues(cards);
         }
@@ -105,17 +113,17 @@ public class Combination {
         // Start checking combinations from the lowest chance of win
         checkProjectStraight();
         checkProjectFlush();
-        checkProjectStraightFlush();
-        checkProjectRoyalFlush();
         checkOnePair();
         checkPairWithKicker();
         checkTwoPair();
-        checkThreeOfAKind();
-        checkStraight();
-        checkFlush();
-        checkFullHouse();
-        checkFourOfAKind();
-        checkStraightRoyalFlush();
+//        checkThreeOfAKind();
+//        checkStraight();
+//        checkFlush();
+//        checkFullHouse();
+//        checkFourOfAKind();
+//        checkStraightRoyalFlush();
+
+        System.out.print(strRank);
     }
 
     /**
@@ -145,20 +153,33 @@ public class Combination {
         return new int[]{highestRank, highestRankPos};
     }
 
+    private int[] cloneCardsArray(int[] from, int[] to) {
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            to[i] = from[i];
+        }
+        return to;
+    }
+
     /**
      * Sorting cards by rank and setting the field sortByRank
      *
      * @param cards - 5-items array with indexes of cards
      */
     private void sortByRank(int[] cards) {
+        cloneCardsArray(cards, sortedByRank);
         // Bubble sort
         for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            for (int j = 0; j < FIVE_CARDS_POKER - i; j++) {
-                if (Card.getRank(cards[j]) > Card.getRank(cards[j + 1])) {
-                    sortedByRank[j] = cards[j + 1];
-                    sortedByRank[j + 1] = cards[j];
+            for (int j = 0; j < FIVE_CARDS_POKER - 1 - i; j++) {
+                if (Card.getRank(sortedByRank[j]) > Card.getRank(sortedByRank[j + 1])) {
+                    int temp = sortedByRank[j];
+                    sortedByRank[j] = sortedByRank[j + 1];
+                    sortedByRank[j + 1] = temp;
                 }
             }
+        }
+
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            strRank += Card.getRank(sortedByRank[i]) + "; ";
         }
     }
 
@@ -168,27 +189,33 @@ public class Combination {
      * @param cards - 5-items array with indexes of cards
      */
     private void sortByRankAndSuit(int[] cards) {
+        cloneCardsArray(cards, sortedByRankAndSuit);
         // Bubble sort
         for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            for (int j = 0; j < FIVE_CARDS_POKER - i; j++) {
-                if (Card.getSuit(cards[j]) > Card.getSuit(cards[j + 1])) {
-                    sortedByRankAndSuit[j] = cards[j + 1];
-                    sortedByRankAndSuit[j + 1] = cards[j];
+            for (int j = 0; j < FIVE_CARDS_POKER - 1; j++) {
+                if (Card.getSuit(sortedByRankAndSuit[j]) > Card.getSuit(sortedByRankAndSuit[j + 1])) {
+                    int temp = sortedByRankAndSuit[j];
+                    sortedByRankAndSuit[j] = sortedByRankAndSuit[j + 1];
+                    sortedByRankAndSuit[j + 1] = temp;
                 }
             }
         }
 
         // Bubble sort
         for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            for (int j = 0; j < FIVE_CARDS_POKER - i; j++) {
+            for (int j = 0; j < FIVE_CARDS_POKER - 1; j++) {
                 if (Card.getRank(sortedByRankAndSuit[j]) > Card.getRank(sortedByRankAndSuit[j + 1])) {
                     if (Card.getSuit(sortedByRankAndSuit[j]) == Card.getSuit(sortedByRankAndSuit[j + 1])) {
-                        int temp = sortedByRank[j];
-                        sortedByRank[j] = sortedByRankAndSuit[j + 1];
-                        sortedByRank[j + 1] = temp;
+                        int temp = sortedByRankAndSuit[j];
+                        sortedByRankAndSuit[j] = sortedByRankAndSuit[j + 1];
+                        sortedByRankAndSuit[j + 1] = temp;
                     }
                 }
             }
+        }
+
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            strRankSuit += Card.getRank(sortedByRankAndSuit[i]) + " " + Card.getSuit(sortedByRankAndSuit[i]) + "; ";
         }
     }
 
@@ -200,7 +227,7 @@ public class Combination {
         boolean isFirstHalf = false;
         boolean isOpen = true;
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1]) + 1 && i > 1) {
+            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1]) + 1 && i > 0) {
                 if (isOpen) {
                     if (i + 2 < FIVE_CARDS_POKER) {
                         if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2])) {
@@ -218,13 +245,12 @@ public class Combination {
                 isFirstHalf = i < 1 ? true : false;
             }
         }
-        // Check in which half of five cards is straight project
-        secondCombinationValue = isFirstHalf ? Card.getRank(sortedByRank[FIVE_CARDS_POKER - 2]) : Card.getRank(sortedByRank[FIVE_CARDS_POKER - 1]);
-        // If highest card in project not Ace then potentialy think that we can get when draw a higher card
-        firstCombinationValue = secondCombinationValue == Card.ACE ? secondCombinationValue : secondCombinationValue + 1;
+        secondCombinationValue = -1;
+        // Get the first value according to half in what straight project have been detected
+        firstCombinationValue = isFirstHalf ? Card.getRank(sortedByRank[4]) : Card.getRank(sortedByRank[4]);
         // Setting mask accodring to in what half the project of straight
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_STRAIGHT;
+        combinationName = isOpen ? PROJECT_STRAIGHT_OPEN : PROJECT_STRAIGHT_INSIDE;
     }
 
     /**
@@ -232,21 +258,26 @@ public class Combination {
      * firstCombinationValue, secondCombinationValue
      */
     private void checkProjectFlush() {
-        boolean isFirstHalf = false;
+        int cardsOfSameSuit = 0;
+        int startSameSuitPos = 0;
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getSuit(sortedByRankAndSuit[i]) != Card.getSuit(sortedByRankAndSuit[i + 1]) && i > 1) {
-                return;
+            if (Card.getSuit(sortedByRankAndSuit[i]) == Card.getSuit(sortedByRankAndSuit[i + 1])) {
+                cardsOfSameSuit++;
             } else {
-                isFirstHalf = i < 1 ? true : false;
+                if (cardsOfSameSuit < 3) {
+                    cardsOfSameSuit = 1;
+                    startSameSuitPos = i;
+                }
             }
         }
-        // Check in which half of five cards is flush project
-        secondCombinationValue = isFirstHalf ? Card.getRank(sortedByRankAndSuit[FIVE_CARDS_POKER - 2]) : Card.getRank(sortedByRankAndSuit[FIVE_CARDS_POKER - 1]);
-        // The highest card in the project is always Ace
-        firstCombinationValue = Card.ACE;
-        // Setting mask accodring to in what half the project of flush
-        mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_FLUSH;
+        if (cardsOfSameSuit > 2) {
+            // Setting mask accodring to in what half the project of flush
+            resetMask();
+            for (int i = startSameSuitPos; i < cardsOfSameSuit; i++) {
+                mask[i] = true;
+            }
+            combinationName = cardsOfSameSuit == 3 ? PROJECT_FLUSH_THREE : PROJECT_FLUSH_FOUR;
+        }
     }
 
     /**
@@ -256,9 +287,9 @@ public class Combination {
     private void checkProjectStraightFlush() {
         boolean isFirstHalf = false;
         boolean isOpen = true;
-        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+        for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getRank(cards[i]) != Card.getRank(cards[i + 1]) + 1
-                    && i > 1 && Card.getSuit(cards[i]) != Card.getSuit(cards[i + 1])) {
+                    && i > 0 && Card.getSuit(cards[i]) != Card.getSuit(cards[i + 1])) {
                 if (isOpen) {
                     if (i + 2 < FIVE_CARDS_POKER) {
                         if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2])
@@ -283,7 +314,7 @@ public class Combination {
         firstCombinationValue = secondCombinationValue == Card.ACE ? secondCombinationValue : secondCombinationValue + 1;
         // Setting mask accodring to in what half the project of straight flush
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-        combinationName = PROJECT_STRAIGHT_FLUSH;
+        combinationName = PROJECT_STRAIGHT_OPEN;
     }
 
     /**
@@ -294,7 +325,7 @@ public class Combination {
         boolean isFirstHalf = false;
         boolean isOpen = true;
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1]) + 1 && i > 1
+            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1]) + 1 && i > 0
                     && Card.getSuit(sortedByRank[i]) != Card.getSuit(sortedByRank[i + 1])) {
                 if (isOpen) {
                     if (i + 2 < FIVE_CARDS_POKER) {
@@ -321,7 +352,7 @@ public class Combination {
             firstCombinationValue = Card.ACE;
             // Setting mask accodring to in what half the project of straight flush
             mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
-            combinationName = PROJECT_STRAIGHT_FLUSH;
+            combinationName = PROJECT_STRAIGHT_OPEN;
         }
     }
 
@@ -348,14 +379,16 @@ public class Combination {
      * mask, firstCombinationValue, secondCombinationValue
      */
     private void checkPairWithKicker() {
+        int[] temp = findHighestRank(sortedByRank);
+        theHighestCardValue = temp[VALUE];
+        theHighestCardValuePos = temp[POSITION];
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])
                     && (theHighestCardValue == Card.KING || theHighestCardValue == Card.ACE)) {
                 resetMask();
-                int[] highestRank = findHighestRank(sortedByRank);
                 mask[i] = true;
                 mask[i + 1] = true;
-                mask[highestRank[POSITION]] = true;
+                mask[theHighestCardValuePos] = true;
                 combinationName = PAIR_WITH_KICKER;
                 return;
             }
@@ -424,7 +457,7 @@ public class Combination {
      */
     private void checkStraight() {
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1])) {
+            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1] - 1)) {
                 return;
             }
         }
@@ -455,6 +488,26 @@ public class Combination {
      * firstCombinationValue, secondCombinationValue
      */
     private void checkFullHouse() {
+        int i = 0;
+        if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])
+                && Card.getRank(sortedByRank[i + 2]) == Card.getRank(sortedByRank[i + 3])
+                && Card.getRank(sortedByRank[i + 2]) == Card.getRank(sortedByRank[i + 4])) {
+            firstCombinationValue = Card.getRank(sortedByRank[i]) > Card.getRank(sortedByRank[i + 4]) ? Card.getRank(sortedByRank[i]) : Card.getRank(sortedByRank[i + 4]);
+            secondCombinationValue = Card.getRank(sortedByRank[i]) > Card.getRank(sortedByRank[i + 4]) ? Card.getRank(sortedByRank[i + 4]) : Card.getRank(sortedByRank[i]);
+            mask = new boolean[]{true, true, true, true, true};
+            combinationName = FULL_HOUSE;
+        }
+
+        if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])
+                && Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 2])
+                && Card.getRank(sortedByRank[i + 3]) == Card.getRank(sortedByRank[i + 4])) {
+            if (Card.getRank(sortedByRank[i]) > Card.getRank(sortedByRank[i + 3])) {
+                firstCombinationValue = Card.getRank(sortedByRank[i]) > Card.getRank(sortedByRank[i + 4]) ? Card.getRank(sortedByRank[i]) : Card.getRank(sortedByRank[i + 4]);
+                secondCombinationValue = Card.getRank(sortedByRank[i]) > Card.getRank(sortedByRank[i + 4]) ? Card.getRank(sortedByRank[i + 4]) : Card.getRank(sortedByRank[i]);
+                mask = new boolean[]{true, true, true, true, true};
+                combinationName = FULL_HOUSE;
+            }
+        }
     }
 
     /**
@@ -462,24 +515,25 @@ public class Combination {
      * firstCombinationValue, secondCombinationValue
      */
     private void checkFourOfAKind() {
+        boolean isFirstHalf = true;
         for (int i = 0; i < FIVE_CARDS_POKER - 3; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1])
-                    && Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2])
-                    && Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 3])
-                    && Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 4])
+            if ((Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1])
+                    || Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2])
+                    || Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 3]))
                     && i > 0) {
                 return;
             } else {
-                firstCombinationValue = Card.getRank(sortedByRank[i]);
-                secondCombinationValue = -1;
-                if (theHighestCardValue < Card.NINE) {
-                    mask = new boolean[]{i > 0 ? false : true, true, true, i > 0 ? true : false};
-                } else {
-                    mask = new boolean[]{true, true, true, true, true};
-                }
-                combinationName = FOUR_OF_A_KIND;
+                isFirstHalf = false;
             }
         }
+        firstCombinationValue = Card.getRank(sortedByRank[2]);
+        secondCombinationValue = -1;
+        if (theHighestCardValue < Card.NINE) {
+            mask = new boolean[]{isFirstHalf ? true : false, true, true, isFirstHalf ? false : true};
+        } else {
+            mask = new boolean[]{true, true, true, true, true};
+        }
+        combinationName = FOUR_OF_A_KIND;
     }
 
     /**
@@ -488,7 +542,7 @@ public class Combination {
      */
     private void checkStraightRoyalFlush() {
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1])
+            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1] - 1)
                     || Card.getSuit(sortedByRank[i]) != Card.getSuit(sortedByRank[i + 1])) {
                 return;
             }
@@ -496,6 +550,9 @@ public class Combination {
         firstCombinationValue = Card.getRank(sortedByRank[FIVE_CARDS_POKER - 1]);
         secondCombinationValue = -1;
         mask = new boolean[]{true, true, true, true, true};
+        int[] highestValue = findHighestRank(sortedByRank);
+        theHighestCardValue = highestValue[VALUE];
+        theHighestCardValuePos = highestValue[POSITION];
         combinationName = theHighestCardValue == Card.ACE ? ROYAL_FLUSH : STRAIGHT_FLUSH;
     }
 
@@ -505,7 +562,7 @@ public class Combination {
     /**
      * @return the combinationName
      */
-    public String getCombinationName() {
+    public int getCombinationName() {
         return combinationName;
     }
 

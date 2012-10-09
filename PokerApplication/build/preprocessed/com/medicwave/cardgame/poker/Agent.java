@@ -97,7 +97,8 @@ public class Agent {
      * @return Combination object
      */
     public Combination findBestCombination(Hand hand) {
-        return new Combination(hand);
+        Combination combination = new Combination(hand);
+        return combination;
     }
 
     /**
