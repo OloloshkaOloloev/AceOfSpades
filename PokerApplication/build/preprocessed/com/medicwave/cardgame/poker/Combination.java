@@ -116,12 +116,12 @@ public class Combination {
         checkOnePair();
         checkPairWithKicker();
         checkTwoPair();
-//        checkThreeOfAKind();
-//        checkStraight();
-//        checkFlush();
-//        checkFullHouse();
-//        checkFourOfAKind();
-//        checkStraightRoyalFlush();
+        checkThreeOfAKind();
+        checkStraight();
+        checkFlush();
+        checkFullHouse();
+        checkFourOfAKind();
+        checkStraightRoyalFlush();
 
         System.out.print(strRank);
     }
@@ -227,14 +227,10 @@ public class Combination {
         boolean isFirstHalf = false;
         boolean isOpen = true;
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
-            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1]) + 1 && i > 0) {
+            if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1] - 1) && i > 0) {
                 if (isOpen) {
-                    if (i + 2 < FIVE_CARDS_POKER) {
-                        if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2])) {
-                            return;
-                        } else {
-                            isOpen = false;
-                        }
+                    if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2] - 2) && i > 0) {
+                        isOpen = false;
                     } else {
                         return;
                     }

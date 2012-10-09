@@ -47,20 +47,21 @@ public class PokerClient extends PokerClientBase {
 //            }
 //        }
 
-        //testCases = new int[][]{{19, 32, 12, 22, 36}, {0, 37, 50, 24, 1}, {27, 14, 20, 33, 46}, {43, 31, 19, 7, 47}, {39, 44, 47, 50, 49}, {29, 42, 16, 3, 0}, {24, 23, 22, 21, 20}, {25, 24, 23, 22, 21}};
-
+//        testCases = new int[][]{{19, 32, 12, 22, 36}, {0, 37, 50, 24, 1}, {27, 14, 20, 33, 46}, {43, 31, 19, 7, 47}, {39, 44, 47, 50, 49}, {29, 42, 16, 3, 0}, {24, 23, 22, 21, 20}, {25, 24, 23, 22, 21}};
+//        for (int i = 0; i < 8; i++) {
+//            Combination combination = new Combination(testCases[i]);
+//        }
         testCases = new int[][]{{34, 21, 41, 28, 1}, {44, 32, 47, 35, 13}, {30, 18, 45, 33, 1}, {40, 47, 51, 10, 11}, {41, 39, 46, 47, 48}, {12, 14, 30, 17, 48}};
-        
         // Start testing
         for (int i = 0; i < 8; i++) {
-            new Combination(testCases[i]);
+            Combination combination = new Combination(testCases[i]);
         }
     }
 
     /**
      * Gets the name of the player.
      *
-     * @return The name of the player as a single word without *
+     * @return The name of the player as a single word without * *
      * space. <code>null</code> is not a valid answer.
      */
     protected String queryPlayerName() {
@@ -234,7 +235,7 @@ public class PokerClient extends PokerClientBase {
      * @return An answer to the open query. The answer action must be one of
      * {@link BettingAnswer#ACTION_OPEN}, {@link BettingAnswer#ACTION_ALLIN} or
      *                              {@link BettingAnswer#ACTION_CHECK }. If the action is open, the answers
-     * amount of chips in the anser must be *
+     * amount of chips in the anser must be * *
      * between <code>minimumPotAfterOpen</code> and the players total amount of
      * chips (the amount of chips alrady put into pot plus the remaining amount
      * of chips).
@@ -285,14 +286,14 @@ public class PokerClient extends PokerClientBase {
      * @param playersRemainingChips the number of chips the player has not yet
      * put into the pot.
      * @return An answer to the call or raise query. The answer action must be
-     * one of null null     {@link BettingAnswer#ACTION_FOLD}, {@link BettingAnswer#ACTION_CALL},
+     * one of null null null null     {@link BettingAnswer#ACTION_FOLD}, {@link BettingAnswer#ACTION_CALL},
      *                                  {@link BettingAnswer#ACTION_RAISE} or {@link BettingAnswer#ACTION_ALLIN
      * }. If the players number of remaining chips is less than the maximum bet
      * and the players current bet, the call action is not available. If the
      * players number of remaining chips plus the players current bet is less
      * than the minimum amount of chips to raise to, the raise action is not
      * available. If the action is raise, the answers amount of chips is the
-     * total amount of chips the player puts into the pot and must be *
+     * total amount of chips the player puts into the pot and must be * *
      * between <code>minimumAmountToRaiseTo</code> and
      * <code>playersCurrentBet+playersRemainingChips</code>.
      */

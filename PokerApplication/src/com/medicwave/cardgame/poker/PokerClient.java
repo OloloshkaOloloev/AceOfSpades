@@ -47,15 +47,14 @@ public class PokerClient extends PokerClientBase {
 //            }
 //        }
 
-        testCases = new int[][]{{19, 32, 12, 22, 36}, {0, 37, 50, 24, 1}, {27, 14, 20, 33, 46}, {43, 31, 19, 7, 47}, {39, 44, 47, 50, 49}, {29, 42, 16, 3, 0}, {24, 23, 22, 21, 20}, {25, 24, 23, 22, 21}};
-        for (int i = 0; i < 8; i++) {
-            Combination combination = new Combination(testCases[i]);
-        }
+//        testCases = new int[][]{{19, 32, 12, 22, 36}, {0, 37, 50, 24, 1}, {27, 14, 20, 33, 46}, {43, 31, 19, 7, 47}, {39, 44, 47, 50, 49}, {29, 42, 16, 3, 0}, {24, 23, 22, 21, 20}, {25, 24, 23, 22, 21}};
+//        for (int i = 0; i < 8; i++) {
+//            Combination combination = new Combination(testCases[i]);
+//        }
         testCases = new int[][]{{34, 21, 41, 28, 1}, {44, 32, 47, 35, 13}, {30, 18, 45, 33, 1}, {40, 47, 51, 10, 11}, {41, 39, 46, 47, 48}, {12, 14, 30, 17, 48}};
         // Start testing
         for (int i = 0; i < 8; i++) {
             Combination combination = new Combination(testCases[i]);
-            
         }
     }
 
