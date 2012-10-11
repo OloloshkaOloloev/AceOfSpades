@@ -81,18 +81,18 @@ public class Agent {
 //        }
     }
 
-//    public void refreshHand(int[] cards) {
-//        combination = new Combination(cards);
-////        if (!round) {
-////            probabilityOfImprove = (float) calculateProbabilityToImprove(combination);
-////            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
-////        } else {
-////            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
-////        }
-////
-////        
-////        System.out.print("");
-//    }
+    public void refreshHand(int[] cards) {
+        combination = new Combination(cards);
+//        if (!round) {
+//            probabilityOfImprove = (float) calculateProbabilityToImprove(combination);
+//            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
+//        } else {
+//            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
+//        }
+//
+//        
+//        System.out.print("");
+    }
 
     /**
      * Called when we computed combination and probability

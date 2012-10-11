@@ -40,11 +40,11 @@ public class PokerClient extends PokerClientBase {
 //        random = new Random();
 //
 //        // Creating test array
-////        for (int i = 0; i < NUMBER_OF_CASES; i++) {
-////            for (int j = 0; j < Combination.FIVE_CARDS_POKER; j++) {
-////                testCases[i][j] = random.nextInt(SEED);
-////            }
-////        }
+        for (int i = 0; i < NUMBER_OF_CASES; i++) {
+            for (int j = 0; j < Combination.FIVE_CARDS_POKER; j++) {
+                testCases[i][j] = random.nextInt(SEED);
+            }
+        }
 //
 //        // Starting testing
 ////        testCases = new int[][]{{19, 32, 12, 22, 36}, {0, 37, 50, 24, 1}, {27, 14, 20, 33, 46}, {43, 31, 19, 7, 47}, {39, 44, 47, 50, 49}, {29, 42, 16, 3, 0}, {24, 23, 22, 21, 20}, {25, 24, 23, 22, 21}};
@@ -52,13 +52,14 @@ public class PokerClient extends PokerClientBase {
 ////            Agent agent = new Agent(testCases[i]);
 ////        }
         //testCases = new int[][]{{34, 21, 41, 28, 1}, {44, 32, 47, 35, 13}, {30, 18, 45, 33, 1}, {40, 47, 51, 10, 11}, {41, 26, 46, 47, 48}, {12, 14, 30, 17, 48}};
-//        testCases = new int[][]{{11, 2, 0, 34, 37}};
-//        //Start testing
-//        for (int i = 0; i < 1; i++) {
-//            Agent agent = new Agent(testCases[i]);
-//            Card[] cards = agent.getCardsToThrow();
-//            System.out.print("");
-//        }
+        //testCases = new int[][]{{20, 44, 23, 0, 8}};
+        //Start testing
+        for (int i = 0; i < NUMBER_OF_CASES; i++) {
+            Agent agent = new Agent();
+            agent.refreshHand(testCases[i]);
+            Card[] cards = agent.getCardsToThrow();
+            System.out.print("");
+        }
     }
 
     /**
@@ -246,16 +247,6 @@ public class PokerClient extends PokerClientBase {
     protected BettingAnswer queryOpenAction(int minimumPotAfterOpen, int playersCurrentBet, int playersRemainingChips) {
         notifyTextReceivers("Player requested to choose an opening action.");
         return agent.makeOpenAction(this, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
-//        switch (random.nextInt() % 3) {
-//            case 0:
-//                return new BettingAnswer(BettingAnswer.ACTION_CHECK);
-//            case 1:
-//                return new BettingAnswer(BettingAnswer.ACTION_ALLIN);
-//            default:
-//                return new BettingAnswer(playersCurrentBet + playersRemainingChips > minimumPotAfterOpen
-//                        ? BettingAnswer.ACTION_OPEN : BettingAnswer.ACTION_CHECK,
-//                        minimumPotAfterOpen + (playersCurrentBet + playersRemainingChips + 10 > minimumPotAfterOpen ? random.nextInt(10) : 0));
-//        }
     }
 
     /**
@@ -267,7 +258,6 @@ public class PokerClient extends PokerClientBase {
     protected void infoCardsInHand(Hand hand) {
         notifyTextReceivers("The cards in hand is" + hand + ".");
         agent.refreshHand(hand);
-
         this.hand = hand;
     }
 
@@ -298,19 +288,6 @@ public class PokerClient extends PokerClientBase {
     protected BettingAnswer queryCallRaiseAction(int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
         notifyTextReceivers("Player requested to choose a call/raise action.");
         return agent.makeRaiseAction(this, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
-//        switch (random.nextInt() % 4) {
-//            case 0:
-//                return new BettingAnswer(BettingAnswer.ACTION_FOLD);
-//            case 1:
-//                return new BettingAnswer(BettingAnswer.ACTION_ALLIN);
-//            case 2:
-//                return new BettingAnswer(playersCurrentBet + playersRemainingChips > maximumBet
-//                        ? BettingAnswer.ACTION_CALL : BettingAnswer.ACTION_FOLD);
-//            default:
-//                return new BettingAnswer(playersCurrentBet + playersRemainingChips > minimumAmountToRaiseTo
-//                        ? BettingAnswer.ACTION_RAISE : BettingAnswer.ACTION_FOLD,
-//                        minimumAmountToRaiseTo + (playersCurrentBet + playersRemainingChips + 10 > minimumAmountToRaiseTo ? random.nextInt(10) : 0));
-//        }
     }
 
     /**
@@ -328,12 +305,5 @@ public class PokerClient extends PokerClientBase {
         Card[] cards = agent.getCardsToThrow();
         System.out.print("");
         return cards;
-
-//        int numberOfCardsToThrow = random.nextInt(5);
-//        Card[] cards = new Card[numberOfCardsToThrow];
-//        for (int i = 0; i < cards.length; ++i) {
-//            cards[i] = hand.getCard(i + 1); // getCard uses one-based indexing, not zero-based.
-//        }
-//        return cards;
     }
 }

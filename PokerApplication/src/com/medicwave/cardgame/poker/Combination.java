@@ -2,7 +2,6 @@ package com.medicwave.cardgame.poker;
 
 import ca.ualberta.cs.poker.Card;
 import ca.ualberta.cs.poker.Hand;
-import javax.microedition.lcdui.List;
 
 /**
  * Class finds the combination or the project of the combination
@@ -96,6 +95,8 @@ public class Combination {
     private void calculateValues(int[] cards) {
         // Setting the worst combination name
         combinationName = HIGH_CARD;
+        firstCombinationValue = theHighestCardValue;
+        secondCombinationValue = -1;
 
         // Sorting cards for further finding combinations
         sortByRank(cards);
@@ -119,21 +120,23 @@ public class Combination {
 
     public Card[] getCardsToThrow() {
         int cardsToThrow = 0;
-        for(int i = 0; i < FIVE_CARDS_POKER; i++) {
-            if(!mask[i]) {
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            if (!mask[i]) {
                 cardsToThrow++;
             }
         }
         Card[] cardsArr = new Card[cardsToThrow];
         int j = 0;
-        for(int i = 0; i < FIVE_CARDS_POKER; i++) {
-            if(!mask[i]) {
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
+            if (!mask[i]) {
                 cardsArr[j] = new Card(sortedByRank[i]);
                 j++;
             }
         }
-        return  cardsArr;
-    };
+        return cardsArr;
+    }
+
+    ;
     
     /**
      * Setting all items of mask field to false
@@ -163,7 +166,7 @@ public class Combination {
     }
 
     private int[] cloneCardsArray(int[] from, int[] to) {
-        for(int i = 0; i < FIVE_CARDS_POKER; i++) {
+        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
             to[i] = from[i];
         }
         return to;
@@ -238,8 +241,12 @@ public class Combination {
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 1] - 1) && i > 0) {
                 if (isOpen) {
-                    if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2] - 2) && i > 0) {
-                        isOpen = false;
+                    if (i + 2 < FIVE_CARDS_POKER) {
+                        if (Card.getRank(sortedByRank[i]) != Card.getRank(sortedByRank[i + 2] - 2) && i > 0) {
+                            isOpen = false;
+                        } else {
+                            return;
+                        }
                     } else {
                         return;
                     }
