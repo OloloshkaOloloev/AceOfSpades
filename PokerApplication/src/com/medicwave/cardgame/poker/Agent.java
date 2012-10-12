@@ -11,213 +11,6 @@ import com.medicwave.cardgame.poker.PokerClientBase.BettingAnswer;
  */
 public class Agent {
 
-    // =========================================================================
-    // Fields
-    // =========================================================================
-    private Hand agentHand;
-    private Combination combination;
-    private int[] cards;
-    private boolean round;
-    private float probabilityOfWin = 0;
-    
-    // For open action
-    private int minimumPotAfterOpen = -1;
-    // For raise action
-    private int maximumBet = -1;
-    private int minimumAmountToRaiseTo = -1;
-    // For both actions
-    private int playersCurrentBet = -1;
-    private int playersRemainingChips = -1;
-
-    // =========================================================================
-    // Constructor
-    // =========================================================================
-    public Agent() {
-    }
-
-    public Agent(Hand hand) {
-        this.agentHand = hand;
-        refreshHand(hand);
-    }
-    // =========================================================================
-    // Methods
-    // =========================================================================
-
-    /**
-     * Called when server calls for "PokerClient.queryCardsToThrow"
-     *
-     * @return An array of cards that should be thrown
-     */
-    public Card[] getCardsToThrow() {
-        return combination.getCardsToThrow();
-    }
-
-    /**
-     * Resets agent's fields when act of playing finished
-     */
-    public void reset() {
-        round = false;
-        probabilityOfWin = 0;
-    }
-
-    public void setToRoundTwo() {
-        round = true;
-    }
-
-    /**
-     * Refreshing hand after draw
-     *
-     * @param hand - new hand
-     */
-    public void refreshHand(Hand hand) {
-        this.agentHand = hand;
-        this.combination = new Combination(hand);
-        this.probabilityOfWin = calculateProbabilityOfWin(combination, round);
-        
-//        if (!round) {
-//            calculateProbabilityToImprove(combination);
-//        } else {
-//            calculateProbabilityOfWin(combination);
-//        }
-    }
-
-    public void refreshHand(int[] cards) {
-        combination = new Combination(cards);
-//        if (!round) {
-//            probabilityOfImprove = (float) calculateProbabilityToImprove(combination);
-//            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
-//        } else {
-//            probabilityOfWin = (float) calculateProbabilityOfWin(combination);
-//        }
-//
-//        
-//        System.out.print("");
-    }
-
-    /**
-     * Called when we computed combination and probability
-     *
-     * @param combination - combination that was previously computed
-     * @param probability - probability of win
-     * @return BettingAnswer object according to the hand and chips
-     */
-    public BettingAnswer makeOpenAction(PokerClient pokerClient, int minimumPotAfterOpen, int playersCurrentBet, int playersRemainingChips) {
-        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
-        if (!round) {
-            return Decision.makeOpenActionFirstRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
-        } else {
-            return Decision.makeOpenActionSecondRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
-        }
-    }
-    
-    public BettingAnswer makeRaiseAction(PokerClient pokerClient, int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
-        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
-        return Decision.makeRaiseAction(pokerClient, limit, probabilityOfWin, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
-    } 
-
-    /**
-     * Calculates probability of win with particular combination of cards
-     *
-     * @param combination - object is a result of findBestCombination method
-     * @param round - false = 1st round ; true = 2 round
-     * @return Float value of probable win with given combination
-     */
-    public float calculateProbabilityOfWin(Combination combination, boolean round) {
-        float odd = 0;
-        int firstCard = Card.getRank(combination.getFirstCombinationValue());
-        int highestCard = Card.getRank(combination.getTheHighestCardValue());
-        switch (combination.getCombinationName()) {
-            case Combination.ROYAL_FLUSH:
-                odd = Odds.ROYAL_FLUSH;
-                break;
-            case Combination.STRAIGHT_FLUSH:
-                odd = (float) Odds.STRAIGHT_FLUSH;
-                break;
-            case Combination.FOUR_OF_A_KIND:
-                odd = (float) Odds.FOUR_OF_A_KIND;
-                break;
-            case Combination.FULL_HOUSE:
-                odd = (float) (Odds.FULL_HOUSE + firstCard * Factor.FULL_HOUSE);
-                break;
-            case Combination.FLUSH:
-                odd = (float) (Odds.FLUSH + firstCard * Factor.FLUSH);
-                break;
-            case Combination.STRAIGHT:
-                odd = (float) (Odds.STRAIGHT + highestCard * Factor.STRAIGHT);
-                break;
-            case Combination.THREE_OF_A_KIND:
-                odd = (float) (Odds.THREE_OF_A_KIND + firstCard * Factor.THREE_OF_A_KIND);
-                break;
-            case Combination.TWO_PAIR:
-                odd = (float) (Odds.TWO_PAIR + firstCard * Factor.TWO_PAIR);
-                break;
-            case Combination.ONE_PAIR:
-                if (round) {
-                    odd = (float) (Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR);
-                } else {
-                    odd = (float) ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
-                            * (1 - Improvment.ONE_PAIR)
-                            + Odds.TWO_PAIR * Improvment.TWO_PAIR);
-                }
-
-                break;
-            case Combination.HIGH_CARD:
-                odd = (float) (highestCard * Factor.HIGH_CARD);
-                break;
-            case Combination.PAIR_WITH_KICKER:
-                if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
-                } else {
-                    odd = ((Odds.TWO_PAIR + highestCard * Factor.TWO_PAIR)
-                            * Improvment.PAIR_WITH_KICKER)
-                            + ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
-                            * (1 - Improvment.PAIR_WITH_KICKER));;
-                }
-                break;
-            case Combination.PROJECT_STRAIGHT_INSIDE:
-                if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
-                } else {
-                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
-                            * Improvment.PROJECT_STRAIGHT_INSIDE)
-                            + ((highestCard * Factor.HIGH_CARD)
-                            * (1 - Improvment.PROJECT_STRAIGHT_INSIDE));
-                }
-                break;
-            case Combination.PROJECT_STRAIGHT_OPEN:
-                if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
-                } else {
-                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
-                            * Improvment.PROJECT_STRAIGHT_OPEN)
-                            + ((highestCard * Factor.HIGH_CARD)
-                            * (1 - Improvment.PROJECT_STRAIGHT_OPEN));
-                }
-                break;
-            case Combination.PROJECT_FLUSH_THREE:
-                if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
-                } else {
-                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
-                            * Improvment.PROJECT_FLUSH_THREE)
-                            + ((highestCard * Factor.HIGH_CARD)
-                            * (1 - Improvment.PROJECT_FLUSH_THREE));
-                }
-                break;
-            case Combination.PROJECT_FLUSH_FOUR:
-                if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
-                } else {
-                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
-                            * Improvment.PROJECT_FLUSH_FOUR)
-                            + ((highestCard * Factor.HIGH_CARD)
-                            * (1 - Improvment.PROJECT_FLUSH_FOUR));
-                }
-                break;
-        }
-        return (float) odd;
-    }
-
     /**
      * Inner class for Agent to get the factor for more precission calculating
      * the probabilities
@@ -272,5 +65,186 @@ public class Agent {
         public static final float THREE_OF_A_KIND = (float) 10.52;
         public static final float TWO_PAIR = (float) 8.31;
         public static final float ONE_PAIR = (float) 28.5;
+    }
+    
+    // =========================================================================
+    // Agent Fields
+    // =========================================================================
+    private Combination combination;
+    private boolean round;
+    private float probabilityOfWin = 0;
+
+    // =========================================================================
+    // Agent Constructors
+    // =========================================================================
+    public Agent() {
+    }
+
+    public Agent(Hand hand) {
+        this.combination = new Combination(hand);
+        this.probabilityOfWin = calculateProbabilityOfWin(combination, round);
+    }
+    // =========================================================================
+    // Agent Methods
+    // =========================================================================
+
+    /**
+     * Called when server calls for "PokerClient.queryCardsToThrow"
+     *
+     * @return An array of cards that should be thrown
+     */
+    public Card[] getCardsToThrow() {
+        return combination.getCardsToThrow();
+    }
+
+    /**
+     * Resets agent's fields when act of playing finished
+     */
+    public void reset() {
+        round = false;
+        probabilityOfWin = 0;
+    }
+
+    public void setToRoundTwo() {
+        round = true;
+    }
+
+    /**
+     * Refreshing hand after draw
+     *
+     * @param hand - new hand
+     */
+    public void refreshHand(Hand hand) {
+        this.combination = new Combination(hand);
+        this.probabilityOfWin = calculateProbabilityOfWin(combination, round);
+    }
+
+    public void refreshHand(int[] cards) {
+        combination = new Combination(cards);
+        this.probabilityOfWin = calculateProbabilityOfWin(combination, round);
+    }
+
+    /**
+     * Called when we computed combination and probability
+     *
+     * @param combination - combination that was previously computed
+     * @param probability - probability of win
+     * @return BettingAnswer object according to the hand and chips
+     */
+    public BettingAnswer makeOpenAction(PokerClient pokerClient, int minimumPotAfterOpen, int playersCurrentBet, int playersRemainingChips) {
+        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
+        if (!round) {
+            return Decision.makeOpenActionFirstRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
+        } else {
+            return Decision.makeOpenActionSecondRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
+        }
+    }
+
+    public BettingAnswer makeRaiseAction(PokerClient pokerClient, int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
+        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
+        return Decision.makeRaiseAction(pokerClient, limit, probabilityOfWin, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
+    }
+
+    /**
+     * Calculates probability of win with particular combination of cards
+     *
+     * @param combination - object is a result of findBestCombination method
+     * @param round - false = 1st round ; true = 2 round
+     * @return Float value of probable win with given combination
+     */
+    private float calculateProbabilityOfWin(Combination combination, boolean round) {
+        float odd = 0;
+        int firstCard = Card.getRank(combination.getFirstCombinationValue());
+        int highestCard = Card.getRank(combination.getTheHighestCardValue());
+        switch (combination.getCombinationName()) {
+            case Combination.ROYAL_FLUSH:
+                odd = Odds.ROYAL_FLUSH;
+                break;
+            case Combination.STRAIGHT_FLUSH:
+                odd = (float) Odds.STRAIGHT_FLUSH;
+                break;
+            case Combination.FOUR_OF_A_KIND:
+                odd = (float) Odds.FOUR_OF_A_KIND;
+                break;
+            case Combination.FULL_HOUSE:
+                odd = (float) (Odds.FULL_HOUSE + firstCard * Factor.FULL_HOUSE);
+                break;
+            case Combination.FLUSH:
+                odd = (float) (Odds.FLUSH + firstCard * Factor.FLUSH);
+                break;
+            case Combination.STRAIGHT:
+                odd = (float) (Odds.STRAIGHT + highestCard * Factor.STRAIGHT);
+                break;
+            case Combination.THREE_OF_A_KIND:
+                odd = (float) (Odds.THREE_OF_A_KIND + firstCard * Factor.THREE_OF_A_KIND);
+                break;
+            case Combination.TWO_PAIR:
+                odd = (float) (Odds.TWO_PAIR + firstCard * Factor.TWO_PAIR);
+                break;
+            case Combination.ONE_PAIR:
+                if (round) {
+                    odd = (float) (Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR);
+                } else {
+                    odd = (float) ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
+                            * (1 - Improvment.ONE_PAIR)
+                            + Odds.TWO_PAIR * Improvment.TWO_PAIR);
+                }
+
+                break;
+            case Combination.HIGH_CARD:
+                odd = (float) (highestCard * Factor.HIGH_CARD);
+                break;
+            case Combination.PAIR_WITH_KICKER:
+                if (round) {
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                } else {
+                    odd = ((Odds.TWO_PAIR + highestCard * Factor.TWO_PAIR)
+                            * Improvment.PAIR_WITH_KICKER)
+                            + ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
+                            * (1 - Improvment.PAIR_WITH_KICKER));
+                }
+                break;
+            case Combination.PROJECT_STRAIGHT_INSIDE:
+                if (round) {
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                } else {
+                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
+                            * Improvment.PROJECT_STRAIGHT_INSIDE)
+                            + ((highestCard * Factor.HIGH_CARD)
+                            * (1 - Improvment.PROJECT_STRAIGHT_INSIDE));
+                }
+                break;
+            case Combination.PROJECT_STRAIGHT_OPEN:
+                if (round) {
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                } else {
+                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
+                            * Improvment.PROJECT_STRAIGHT_OPEN)
+                            + ((highestCard * Factor.HIGH_CARD)
+                            * (1 - Improvment.PROJECT_STRAIGHT_OPEN));
+                }
+                break;
+            case Combination.PROJECT_FLUSH_THREE:
+                if (round) {
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                } else {
+                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
+                            * Improvment.PROJECT_FLUSH_THREE)
+                            + ((highestCard * Factor.HIGH_CARD)
+                            * (1 - Improvment.PROJECT_FLUSH_THREE));
+                }
+                break;
+            case Combination.PROJECT_FLUSH_FOUR:
+                if (round) {
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                } else {
+                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
+                            * Improvment.PROJECT_FLUSH_FOUR)
+                            + ((highestCard * Factor.HIGH_CARD)
+                            * (1 - Improvment.PROJECT_FLUSH_FOUR));
+                }
+                break;
+        }
+        return (float) odd;
     }
 }

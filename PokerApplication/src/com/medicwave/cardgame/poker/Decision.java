@@ -22,7 +22,7 @@ public class Decision {
     private static final int RANGE_98 = 98;
     private static final float RANGE_99 = (float) 99.38;
     // =========================================================================
-    // Fields
+    // Constructor
     // =========================================================================
 
     public Decision() {

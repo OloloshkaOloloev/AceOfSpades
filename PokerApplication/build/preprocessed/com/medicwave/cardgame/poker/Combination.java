@@ -63,11 +63,6 @@ public class Combination {
             this.cards[i] = handCards[i + 1];
         }
 
-        // Initializing highest value
-        int[] tempHighest = findHighestRank(cards);
-        theHighestCardValue = tempHighest[VALUE];
-        theHighestCardValuePos = tempHighest[POSITION];
-
         // Start finding combinations
         calculateValues(cards);
     }
@@ -93,16 +88,12 @@ public class Combination {
      * @param cards - 5-items array with indexes of cards
      */
     private void calculateValues(int[] cards) {
-        // Setting the worst combination name
-        combinationName = HIGH_CARD;
-        firstCombinationValue = theHighestCardValue;
-        secondCombinationValue = -1;
-
         // Sorting cards for further finding combinations
         sortByRank(cards);
         sortByRankAndSuit(cards);
 
         // Start checking combinations from the lowest chance of win
+        checkHightCard();
         checkProjectStraight();
         checkProjectFlush();
         checkOnePair();
@@ -114,8 +105,6 @@ public class Combination {
         checkFullHouse();
         checkFourOfAKind();
         checkStraightRoyalFlush();
-
-        System.out.print(strRank);
     }
 
     public Card[] getCardsToThrow() {
@@ -129,7 +118,11 @@ public class Combination {
         int j = 0;
         for (int i = 0; i < FIVE_CARDS_POKER; i++) {
             if (!mask[i]) {
-                cardsArr[j] = new Card(sortedByRank[i]);
+                if (combinationName == PROJECT_FLUSH_THREE || combinationName == PROJECT_FLUSH_FOUR) {
+                    cardsArr[j] = new Card(sortedByRankAndSuit[i]);
+                } else {
+                    cardsArr[j] = new Card(sortedByRank[i]);
+                }
                 j++;
             }
         }
@@ -166,9 +159,7 @@ public class Combination {
     }
 
     private int[] cloneCardsArray(int[] from, int[] to) {
-        for (int i = 0; i < FIVE_CARDS_POKER; i++) {
-            to[i] = from[i];
-        }
+        System.arraycopy(from, 0, to, 0, FIVE_CARDS_POKER);
         return to;
     }
 
@@ -231,6 +222,17 @@ public class Combination {
         }
     }
 
+    private void checkHightCard() {
+        int[] tempHighest = findHighestRank(sortedByRank);
+        theHighestCardValue = tempHighest[VALUE];
+        theHighestCardValuePos = tempHighest[POSITION];
+        resetMask();
+        mask[theHighestCardValuePos] = true;
+        combinationName = HIGH_CARD;
+        firstCombinationValue = theHighestCardValue;
+        secondCombinationValue = -1;
+    }
+
     /**
      * Check hand for straight project and set fields: combinationName, mask,
      * firstCombinationValue, secondCombinationValue
@@ -257,9 +259,9 @@ public class Combination {
                 isFirstHalf = i < 1 ? true : false;
             }
         }
-        secondCombinationValue = -1;
         // Get the first value according to half in what straight project have been detected
         firstCombinationValue = isFirstHalf ? Card.getRank(sortedByRank[4]) : Card.getRank(sortedByRank[4]);
+        secondCombinationValue = -1;
         // Setting mask accodring to in what half the project of straight
         mask = isFirstHalf ? new boolean[]{true, true, true, true, false} : new boolean[]{false, true, true, true, true};
         combinationName = isOpen ? PROJECT_STRAIGHT_OPEN : PROJECT_STRAIGHT_INSIDE;
@@ -272,22 +274,29 @@ public class Combination {
     private void checkProjectFlush() {
         int cardsOfSameSuit = 0;
         int startSameSuitPos = 0;
+        int tempFirstCombValue = sortedByRankAndSuit[0];
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getSuit(sortedByRankAndSuit[i]) == Card.getSuit(sortedByRankAndSuit[i + 1])) {
+                if (Card.getRank(sortedByRankAndSuit[i + 1]) > tempFirstCombValue) {
+                    tempFirstCombValue = Card.getRank(sortedByRankAndSuit[i + 1]);
+                }
                 cardsOfSameSuit++;
             } else {
                 if (i < 3) {
                     cardsOfSameSuit = 1;
                     startSameSuitPos = i + 1;
+                    tempFirstCombValue = Card.getRank(sortedByRankAndSuit[i + 1]);
                 }
             }
         }
         if (cardsOfSameSuit > 2) {
             // Setting mask accodring to in what half the project of flush
             resetMask();
-            for (int i = startSameSuitPos; i < FIVE_CARDS_POKER; i++) {
+            for (int i = startSameSuitPos; i < startSameSuitPos + cardsOfSameSuit; i++) {
                 mask[i] = true;
             }
+            firstCombinationValue = tempFirstCombValue;
+            secondCombinationValue = -1;
             combinationName = cardsOfSameSuit == 3 ? PROJECT_FLUSH_THREE : PROJECT_FLUSH_FOUR;
         }
     }
@@ -300,7 +309,7 @@ public class Combination {
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])) {
                 resetMask();
-                firstCombinationValue = Card.getRank(cards[i]);
+                firstCombinationValue = Card.getRank(sortedByRank[i]);
                 secondCombinationValue = -1;
                 mask[i] = true;
                 mask[i + 1] = true;
@@ -315,15 +324,16 @@ public class Combination {
      * mask, firstCombinationValue, secondCombinationValue
      */
     private void checkPairWithKicker() {
-        int[] temp = findHighestRank(sortedByRank);
-        theHighestCardValue = temp[VALUE];
-        theHighestCardValuePos = temp[POSITION];
+        int tempHighestValue = findHighestRank(sortedByRank)[VALUE];
         for (int i = 0; i < FIVE_CARDS_POKER - 1; i++) {
             if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])
-                    && (theHighestCardValue == Card.KING || theHighestCardValue == Card.ACE)) {
+                    && (tempHighestValue == Card.KING || tempHighestValue == Card.ACE)) {
                 resetMask();
                 mask[i] = true;
                 mask[i + 1] = true;
+                int[] temp = findHighestRank(sortedByRank);
+                theHighestCardValue = temp[VALUE];
+                theHighestCardValuePos = temp[POSITION];
                 mask[theHighestCardValuePos] = true;
                 combinationName = PAIR_WITH_KICKER;
                 return;
@@ -377,7 +387,7 @@ public class Combination {
             if (Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 1])
                     && Card.getRank(sortedByRank[i]) == Card.getRank(sortedByRank[i + 2])) {
                 resetMask();
-                firstCombinationValue = Card.getRank(cards[i]);
+                firstCombinationValue = Card.getRank(sortedByRank[i]);
                 secondCombinationValue = -1;
                 mask[i] = true;
                 mask[i + 1] = true;
@@ -463,7 +473,7 @@ public class Combination {
                 isFirstHalf = false;
             }
         }
-        firstCombinationValue = Card.getRank(sortedByRank[2]);
+        firstCombinationValue = Card.getRank(sortedByRank[2]); // Where rank s equal for both halfs
         secondCombinationValue = -1;
         if (theHighestCardValue < Card.NINE) {
             mask = new boolean[]{isFirstHalf ? true : false, true, true, true, isFirstHalf ? false : true};
