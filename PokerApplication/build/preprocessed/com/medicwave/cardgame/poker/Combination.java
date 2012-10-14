@@ -222,6 +222,10 @@ public class Combination {
         }
     }
 
+    /**
+     * Check hand for high card and set fields: combinationName, mask,
+     * firstCombinationValue, secondCombinationValue
+     */
     private void checkHightCard() {
         int[] tempHighest = findHighestRank(sortedByRank);
         theHighestCardValue = tempHighest[VALUE];

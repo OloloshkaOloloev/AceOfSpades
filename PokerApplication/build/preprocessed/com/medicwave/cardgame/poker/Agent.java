@@ -108,7 +108,7 @@ public class Agent {
     public void setToRoundTwo() {
         round = true;
     }
-
+    
     /**
      * Refreshing hand after draw
      *
@@ -152,7 +152,7 @@ public class Agent {
      * @param round - false = 1st round ; true = 2 round
      * @return Float value of probable win with given combination
      */
-    private float calculateProbabilityOfWin(Combination combination, boolean round) {
+    public static float calculateProbabilityOfWin(Combination combination, boolean round) {
         float odd = 0;
         int firstCard = Card.getRank(combination.getFirstCombinationValue());
         int highestCard = Card.getRank(combination.getTheHighestCardValue());

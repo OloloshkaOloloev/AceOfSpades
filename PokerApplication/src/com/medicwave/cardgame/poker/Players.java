@@ -37,6 +37,23 @@ public class Players {
     // =========================================================================
     // Methods
     // =========================================================================
+    public OtherPlayer getPlayer(String name) {
+        for(int i = 0; i < players.length; i++) {
+            if(players[i] != null && players[i].getPlayerName().equals(name)) {
+                return players[i];
+            }
+        }
+        return null;
+    }
+    
+    public void saveRoundStatistics() {
+        for(int i = 0; i < players.length; i++) {
+            if(players[i] != null) {
+                players[i].saveRoundStatistics();
+            }
+        }
+    }
+    
     private void initIfNeeded(String player) {
         // Finding if player was previously initialized
         for (int i = 0; i < players.length; i++) {
@@ -51,6 +68,14 @@ public class Players {
         for (int i = 0; i < players.length; i++) {
             if (players[i] == null) {
                 players[i] = new OtherPlayer(player);
+            }
+        }
+    }
+    
+    public void resetPlayersInfo() {
+        for(int i = 0; i < players.length; i++) {
+            if(players[i] != null) {
+                players[i].reset();
             }
         }
     }
