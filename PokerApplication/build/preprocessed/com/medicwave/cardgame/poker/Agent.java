@@ -12,6 +12,20 @@ import com.medicwave.cardgame.poker.PokerClientBase.BettingAnswer;
 public class Agent {
 
     /**
+     * @return the limit
+     */
+    public int getLimit() {
+        return limit;
+    }
+
+    /**
+     * @param limit the limit to set
+     */
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    /**
      * Inner class for Agent to get the factor for more precission calculating
      * the probabilities
      */
@@ -20,14 +34,14 @@ public class Agent {
         // =========================================================================
         // Constants
         // =========================================================================
-        public static final float FULL_HOUSE = (float) 0.018;
-        public static final float FLUSH = (float) 0.025;
-        public static final float STRAIGHT = (float) 0.077;
-        public static final float THREE_OF_A_KIND = (float) 0.27;
-        public static final float TWO_PAIR = (float) 0.62;
-        public static final float ONE_PAIR = (float) 5.5;
-        public static final float HIGH_CARD = (float) 1.2;
-        public static final float IMPROVE = (float) 4.28;
+        public static final float FULL_HOUSE = (float) 0.00018;
+        public static final float FLUSH = (float) 0.00025;
+        public static final float STRAIGHT = (float) 0.00077;
+        public static final float THREE_OF_A_KIND = (float) 0.0027;
+        public static final float TWO_PAIR = (float) 0.0062;
+        public static final float ONE_PAIR = (float) 0.055;
+        public static final float HIGH_CARD = (float) 0.012;
+        public static final float IMPROVE = (float) 0.0428;
     }
 
     /**
@@ -38,15 +52,15 @@ public class Agent {
         // =========================================================================
         // Constants
         // =========================================================================
-        public static final float ROYAL_FLUSH = 100;
-        public static final float STRAIGHT_FLUSH = (float) 99.99;
-        public static final float FOUR_OF_A_KIND = (float) 99.95;
-        public static final float FULL_HOUSE = (float) 99.71;
-        public static final float FLUSH = (float) 99.38;
-        public static final float STRAIGHT = (float) 98.71;
-        public static final float THREE_OF_A_KIND = (float) 95.13;
-        public static final float TWO_PAIR = (float) 87.08;
-        public static final float ONE_PAIR = (float) 15.48;
+        public static final float ROYAL_FLUSH = 1;
+        public static final float STRAIGHT_FLUSH = (float) 0.9999;
+        public static final float FOUR_OF_A_KIND = (float) 0.9995;
+        public static final float FULL_HOUSE = (float) 0.9971;
+        public static final float FLUSH = (float) 0.9938;
+        public static final float STRAIGHT = (float) 0.9871;
+        public static final float THREE_OF_A_KIND = (float) 0.9513;
+        public static final float TWO_PAIR = (float) 0.8708;
+        public static final float ONE_PAIR = (float) 0.1548;
     }
 
     /**
@@ -57,22 +71,22 @@ public class Agent {
         // =========================================================================
         // Constants
         // =========================================================================
-        public static final float PAIR_WITH_KICKER = (float) 25;
-        public static final float PROJECT_STRAIGHT_INSIDE = (float) 8.2;
-        public static final float PROJECT_STRAIGHT_OPEN = (float) 16.38;
-        public static final float PROJECT_FLUSH_THREE = (float) 4.13;
-        public static final float PROJECT_FLUSH_FOUR = 18;
-        public static final float THREE_OF_A_KIND = (float) 10.52;
-        public static final float TWO_PAIR = (float) 8.31;
-        public static final float ONE_PAIR = (float) 28.5;
+        public static final float PAIR_WITH_KICKER = (float) 0.25;
+        public static final float PROJECT_STRAIGHT_INSIDE = (float) 0.082;
+        public static final float PROJECT_STRAIGHT_OPEN = (float) 0.1638;
+        public static final float PROJECT_FLUSH_THREE = (float) 0.0413;
+        public static final float PROJECT_FLUSH_FOUR = (float) 0.18;
+        public static final float THREE_OF_A_KIND = (float) 0.1052;
+        public static final float TWO_PAIR = (float) 0.0831;
+        public static final float ONE_PAIR = (float) 0.285;
     }
-    
     // =========================================================================
     // Agent Fields
     // =========================================================================
     private Combination combination;
     private boolean round;
     private float probabilityOfWin = 0;
+    private int limit = 0;
 
     // =========================================================================
     // Agent Constructors
@@ -108,7 +122,7 @@ public class Agent {
     public void setToRoundTwo() {
         round = true;
     }
-    
+
     /**
      * Refreshing hand after draw
      *
@@ -132,17 +146,17 @@ public class Agent {
      * @return BettingAnswer object according to the hand and chips
      */
     public BettingAnswer makeOpenAction(PokerClient pokerClient, int minimumPotAfterOpen, int playersCurrentBet, int playersRemainingChips) {
-        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
+        setLimit(Decision.calculateLimit(probabilityOfWin, playersRemainingChips + playersCurrentBet));
         if (!round) {
-            return Decision.makeOpenActionFirstRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
+            return Decision.makeOpenActionFirstRound(pokerClient, getLimit(), probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
         } else {
-            return Decision.makeOpenActionSecondRound(pokerClient, limit, probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
+            return Decision.makeOpenActionSecondRound(pokerClient, getLimit(), probabilityOfWin, minimumPotAfterOpen, playersCurrentBet, playersRemainingChips);
         }
     }
 
     public BettingAnswer makeRaiseAction(PokerClient pokerClient, int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
-        int limit = Decision.calculateLimit(probabilityOfWin, playersRemainingChips);
-        return Decision.makeRaiseAction(pokerClient, limit, probabilityOfWin, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
+        setLimit(Decision.calculateLimit(probabilityOfWin, playersRemainingChips));
+        return Decision.makeRaiseAction(pokerClient, getLimit(), probabilityOfWin, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
     }
 
     /**
@@ -167,7 +181,7 @@ public class Agent {
                 odd = (float) Odds.FOUR_OF_A_KIND;
                 break;
             case Combination.FULL_HOUSE:
-                odd = (float) (Odds.FULL_HOUSE + firstCard * Factor.FULL_HOUSE);
+                odd = (float) (Odds.FULL_HOUSE + firstCard* Factor.FULL_HOUSE);
                 break;
             case Combination.FLUSH:
                 odd = (float) (Odds.FLUSH + firstCard * Factor.FLUSH);
@@ -176,31 +190,31 @@ public class Agent {
                 odd = (float) (Odds.STRAIGHT + highestCard * Factor.STRAIGHT);
                 break;
             case Combination.THREE_OF_A_KIND:
-                odd = (float) (Odds.THREE_OF_A_KIND + firstCard * Factor.THREE_OF_A_KIND);
+                odd = (float) (Odds.THREE_OF_A_KIND + firstCard* Factor.THREE_OF_A_KIND);
                 break;
             case Combination.TWO_PAIR:
-                odd = (float) (Odds.TWO_PAIR + firstCard * Factor.TWO_PAIR);
+                odd = (float) (Odds.TWO_PAIR + firstCard  * Factor.TWO_PAIR);
                 break;
             case Combination.ONE_PAIR:
                 if (round) {
-                    odd = (float) (Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR);
+                    odd = (float) (Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR);
                 } else {
-                    odd = (float) ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
+                    odd = (float) ((Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR)
                             * (1 - Improvment.ONE_PAIR)
-                            + Odds.TWO_PAIR * Improvment.TWO_PAIR);
+                            + Odds.TWO_PAIR * Improvment.ONE_PAIR);
                 }
 
                 break;
             case Combination.HIGH_CARD:
-                odd = (float) (highestCard * Factor.HIGH_CARD);
+                odd = (float) ((highestCard) * Factor.HIGH_CARD);
                 break;
             case Combination.PAIR_WITH_KICKER:
                 if (round) {
                     odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = ((Odds.TWO_PAIR + highestCard * Factor.TWO_PAIR)
+                    odd = (float) ((Odds.TWO_PAIR + highestCard  * Factor.TWO_PAIR)
                             * Improvment.PAIR_WITH_KICKER)
-                            + ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
+                            + ((Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR)
                             * (1 - Improvment.PAIR_WITH_KICKER));
                 }
                 break;
@@ -208,7 +222,7 @@ public class Agent {
                 if (round) {
                     odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
+                    odd = (float) ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
                             * Improvment.PROJECT_STRAIGHT_INSIDE)
                             + ((highestCard * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_STRAIGHT_INSIDE));
@@ -216,29 +230,29 @@ public class Agent {
                 break;
             case Combination.PROJECT_STRAIGHT_OPEN:
                 if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                    odd = (float) (highestCard  * Factor.HIGH_CARD);
                 } else {
-                    odd = ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
+                    odd = (float) ((Odds.STRAIGHT + highestCard  * Factor.STRAIGHT)
                             * Improvment.PROJECT_STRAIGHT_OPEN)
-                            + ((highestCard * Factor.HIGH_CARD)
+                            + ((highestCard  * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_STRAIGHT_OPEN));
                 }
                 break;
             case Combination.PROJECT_FLUSH_THREE:
                 if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                    odd = (float) (highestCard  * Factor.HIGH_CARD);
                 } else {
-                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
+                    odd = (float) ((Odds.FLUSH + highestCard  * Factor.FLUSH)
                             * Improvment.PROJECT_FLUSH_THREE)
-                            + ((highestCard * Factor.HIGH_CARD)
+                            + ((highestCard  * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_FLUSH_THREE));
                 }
                 break;
             case Combination.PROJECT_FLUSH_FOUR:
                 if (round) {
-                    odd = (float) (highestCard * Factor.HIGH_CARD);
+                    odd = (float) (highestCard  * Factor.HIGH_CARD);
                 } else {
-                    odd = ((Odds.FLUSH + highestCard * Factor.FLUSH)
+                    odd = (float) ((Odds.FLUSH + highestCard  * Factor.FLUSH)
                             * Improvment.PROJECT_FLUSH_FOUR)
                             + ((highestCard * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_FLUSH_FOUR));

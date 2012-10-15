@@ -231,8 +231,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerDraw(String playerName, int cardCount) {
         notifyTextReceivers("Player " + playerName + " exchanged " + cardCount + " cards.");
-        if (!playerName.equals(this.name)) {
-            players.setCardsCountPlayerThrown(playerName, cardCount);
+        OtherPlayer player = players.getPlayer(playerName);
+        if (playerName != null && !playerName.equals(name)) {
+            player.calculateProbabilityOfWin(cardCount);
         }
     }
 

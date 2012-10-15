@@ -9,10 +9,20 @@ import ca.ualberta.cs.poker.Hand;
  */
 public class OtherPlayer {
     // =========================================================================
-    // Fields
+    // Constants
     // =========================================================================
 
+    public final static int DRAW_0 = 99;
+    public final static int DRAW_1 = 64;
+    public final static int DRAW_2 = 53;
+    public final static int DRAW_3 = 45;
+    public final static int DRAW_4 = 30;
+    public final static int DRAW_5 = 10;
+    // =========================================================================
+    // Fields
+    // =========================================================================
     private String nameId = null;
+    private float probabilitiesOfWin = 0;
     private int numberOfThrownCards = 0;
     private int chips = 0;
     private RoundStatistics roundStatistics = new RoundStatistics();
@@ -30,6 +40,25 @@ public class OtherPlayer {
     // =========================================================================
     // Methods
     // =========================================================================
+    public void calculateProbabilityOfWin(int cardsDraw) {
+        switch (cardsDraw) {
+            case 0:
+                probabilitiesOfWin = DRAW_0;
+            case 1:
+                probabilitiesOfWin = DRAW_1;
+            case 2:
+                probabilitiesOfWin = DRAW_2;
+            case 3:
+                probabilitiesOfWin = DRAW_3;
+            case 4:
+                probabilitiesOfWin = DRAW_4;
+            case 5:
+                probabilitiesOfWin = DRAW_5;
+            default:
+                probabilitiesOfWin = 0;
+        }
+    }
+
     public void reset() {
         this.numberOfThrownCards = 0;
         this.roundStatistics = new RoundStatistics();
