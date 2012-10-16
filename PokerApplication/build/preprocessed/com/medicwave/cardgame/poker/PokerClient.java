@@ -18,9 +18,11 @@ public class PokerClient extends PokerClientBase {
     private String name = null;
     private Agent agent = new Agent();
     private Players players = new Players();
+    private LearningAlgorithm learningAlgorithm = new LearningAlgorithm();
+    private int round = 0;
     // For test
-    public static final int NUMBER_OF_CASES = 50;
-    public static final int SEED = 51;
+//    public static final int NUMBER_OF_CASES = 50;
+//    public static final int SEED = 51;
     //private static int[][] testCases = new int[NUMBER_OF_CASES][Combination.FIVE_CARDS_POKER];
 
     /**
@@ -63,7 +65,8 @@ public class PokerClient extends PokerClientBase {
     /**
      * Gets the name of the player.
      *
-     * @return The name of the player as a single word without * * * * *      * space. <code>null</code> is not a valid answer.
+     * @return The name of the player as a single word without * * * * * *
+     * space. <code>null</code> is not a valid answer.
      */
     protected String queryPlayerName() {
         // NOTE
@@ -82,6 +85,7 @@ public class PokerClient extends PokerClientBase {
      * @param round the round number (increased for each new round).
      */
     protected void infoNewRound(int round) {
+        this.round++;
         players.saveRoundStatistics();
         players.resetPlayersInfo();
         agent.reset();
@@ -126,10 +130,7 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoForcedBet(String playerName, int forcedBet) {
         notifyTextReceivers("Player " + playerName + " made a forced bet of " + forcedBet + " chips.");
-        OtherPlayer player = players.getPlayer(playerName);
-        if(player != null) {
-            player.getRoundStatistics().increaseChipsBetted(forcedBet);
-        }
+        players.increaseChipsBetted(playerName, forcedBet);
     }
 
     /**
@@ -140,12 +141,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerOpen(String playerName, int openBet) {
         // Increasing raises count in statistics
-        OtherPlayer player = players.getPlayer(name);
-        if (player != null) {
-            player.getRoundStatistics().increaseRaises();
-            player.getRoundStatistics().increaseChipsBetted(openBet);
-        }
         notifyTextReceivers("Player " + playerName + " opened, has put " + openBet + " chips into the pot.");
+        players.increaseRaises(playerName);
+        players.increaseChipsBetted(playerName, openBet);
     }
 
     /**
@@ -155,11 +153,8 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerCheck(String playerName) {
         // Increase checks in statistics
-        OtherPlayer player = players.getPlayer(name);
-        if (player != null) {
-            player.getRoundStatistics().increaseChecks();
-        }
         notifyTextReceivers("Player " + playerName + " checked.");
+        players.increaseChecks(playerName);
     }
 
     /**
@@ -170,12 +165,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerRaise(String playerName, int amountRaisedTo) {
         // Increasing raises count in statistics
-        OtherPlayer player = players.getPlayer(name);
-        if(player != null) {
-            player.getRoundStatistics().increaseRaises();
-            player.getRoundStatistics().increaseChipsBetted(amountRaisedTo);
-        }
         notifyTextReceivers("Player " + playerName + " raised to " + amountRaisedTo + " chips.");
+        players.increaseRaises(playerName);
+        players.increaseChipsBetted(playerName, amountRaisedTo);
     }
 
     /**
@@ -185,11 +177,8 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerCall(String playerName) {
         // Increasing calls count in statistics
-        OtherPlayer player = players.getPlayer(name);
-        if(player != null) {
-            player.getRoundStatistics().increaseCalls();
-        }
         notifyTextReceivers("Player " + playerName + " called.");
+        players.increaseCalls(playerName);
     }
 
     /**
@@ -199,11 +188,8 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerFold(String playerName) {
         // Setting fold in statistics for particular round
-        OtherPlayer player = players.getPlayer(name);
-        if(player != null) {
-            player.getRoundStatistics().setFold(true);
-        }
         notifyTextReceivers("Player " + playerName + " folded.");
+        players.increaseFolds(playerName);
     }
 
     /**
@@ -215,12 +201,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoPlayerAllIn(String playerName, int allInChipCount) {
         // Setting all-in in statistics for particular round
-        OtherPlayer player = players.getPlayer(name);
-        if(player != null) {
-            player.getRoundStatistics().setAllIn(true);
-            player.getRoundStatistics().increaseChipsBetted(allInChipCount);
-        }
         notifyTextReceivers("Player " + playerName + " goes all-in with a pot of " + allInChipCount + " chips.");
+        players.increaseAllIns(playerName);
+        players.increaseChipsBetted(playerName, allInChipCount);
     }
 
     /**
@@ -235,6 +218,8 @@ public class PokerClient extends PokerClientBase {
         if (playerName != null && !playerName.equals(name)) {
             player.calculateProbabilityOfWin(cardCount);
         }
+
+        // TODO
     }
 
     /**
@@ -246,10 +231,6 @@ public class PokerClient extends PokerClientBase {
     protected void infoPlayerHand(String playerName, Hand hand) {
         // The hands toString() methods prepends the returned string with space.
         notifyTextReceivers("Player " + playerName + " has this hand:" + hand + " (" + getHandName(hand) + ", category #" + getHandCategory(hand) + ")");
-        OtherPlayer player = players.getPlayer(playerName);
-        if(player != null) {
-            player.calculateAggressiveCoefficient(hand);
-        }
     }
 
     /**
@@ -261,6 +242,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoRoundUndisputedWin(String playerName, int winAmount) {
         notifyTextReceivers("Player " + playerName + " won " + winAmount + " chips undisputed.");
+        if (!playerName.equals(name)) {
+            learningAlgorithm.isPlayerAggresive(players.getPlayer(playerName), players.getPlayer(name).getFullStatistics(), round);
+        }
     }
 
     /**
@@ -272,6 +256,9 @@ public class PokerClient extends PokerClientBase {
      */
     protected void infoRoundResult(String playerName, int winAmount) {
         notifyTextReceivers("Player " + playerName + " won " + winAmount + " chips.");
+        if (!playerName.equals(name)) {
+            learningAlgorithm.isPlayerAggresive(players.getPlayer(playerName), players.getPlayer(name).getFullStatistics(), round);
+        }
     }
 
     /**
@@ -287,9 +274,10 @@ public class PokerClient extends PokerClientBase {
      * @return An answer to the open query. The answer action must be one of
      * {@link BettingAnswer#ACTION_OPEN}, {@link BettingAnswer#ACTION_ALLIN} or
      *                              {@link BettingAnswer#ACTION_CHECK }. If the action is open, the answers
-     * amount of chips in the anser must be * * * * *      * between <code>minimumPotAfterOpen</code> and the players total
-     * amount of chips (the amount of chips alrady put into pot plus the
-     * remaining amount of chips).
+     * amount of chips in the anser must be * * * * * *
+     * between <code>minimumPotAfterOpen</code> and the players total amount of
+     * chips (the amount of chips alrady put into pot plus the remaining amount
+     * of chips).
      */
     protected BettingAnswer queryOpenAction(int minimumPotAfterOpen, int playersCurrentBet, int playersRemainingChips) {
         notifyTextReceivers("Player requested to choose an opening action.");
@@ -320,7 +308,7 @@ public class PokerClient extends PokerClientBase {
      * @param playersRemainingChips the number of chips the player has not yet
      * put into the pot.
      * @return An answer to the call or raise query. The answer action must be
-     * one of null null null null null null null null null null null     {@link BettingAnswer#ACTION_FOLD}, {@link BettingAnswer#ACTION_CALL},
+     * one of null null null null null null null null null null null null     {@link BettingAnswer#ACTION_FOLD}, {@link BettingAnswer#ACTION_CALL},
      *                                  {@link BettingAnswer#ACTION_RAISE} or {@link BettingAnswer#ACTION_ALLIN
      * }. If the players number of remaining chips is less than the maximum bet
      * and the players current bet, the call action is not available. If the

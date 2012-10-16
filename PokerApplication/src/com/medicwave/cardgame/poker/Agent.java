@@ -155,7 +155,7 @@ public class Agent {
     }
 
     public BettingAnswer makeRaiseAction(PokerClient pokerClient, int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
-        setLimit(Decision.calculateLimit(probabilityOfWin, playersRemainingChips));
+        setLimit(Decision.calculateLimit(probabilityOfWin, playersRemainingChips + playersCurrentBet));
         return Decision.makeRaiseAction(pokerClient, getLimit(), probabilityOfWin, maximumBet, minimumAmountToRaiseTo, playersCurrentBet, playersRemainingChips);
     }
 
@@ -181,7 +181,7 @@ public class Agent {
                 odd = (float) Odds.FOUR_OF_A_KIND;
                 break;
             case Combination.FULL_HOUSE:
-                odd = (float) (Odds.FULL_HOUSE + firstCard* Factor.FULL_HOUSE);
+                odd = (float) (Odds.FULL_HOUSE + firstCard * Factor.FULL_HOUSE);
                 break;
             case Combination.FLUSH:
                 odd = (float) (Odds.FLUSH + firstCard * Factor.FLUSH);
@@ -190,16 +190,16 @@ public class Agent {
                 odd = (float) (Odds.STRAIGHT + highestCard * Factor.STRAIGHT);
                 break;
             case Combination.THREE_OF_A_KIND:
-                odd = (float) (Odds.THREE_OF_A_KIND + firstCard* Factor.THREE_OF_A_KIND);
+                odd = (float) (Odds.THREE_OF_A_KIND + firstCard * Factor.THREE_OF_A_KIND);
                 break;
             case Combination.TWO_PAIR:
-                odd = (float) (Odds.TWO_PAIR + firstCard  * Factor.TWO_PAIR);
+                odd = (float) (Odds.TWO_PAIR + firstCard * Factor.TWO_PAIR);
                 break;
             case Combination.ONE_PAIR:
                 if (round) {
-                    odd = (float) (Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR);
+                    odd = (float) (Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR);
                 } else {
-                    odd = (float) ((Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR)
+                    odd = (float) ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
                             * (1 - Improvment.ONE_PAIR)
                             + Odds.TWO_PAIR * Improvment.ONE_PAIR);
                 }
@@ -212,9 +212,9 @@ public class Agent {
                 if (round) {
                     odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = (float) ((Odds.TWO_PAIR + highestCard  * Factor.TWO_PAIR)
+                    odd = (float) ((Odds.TWO_PAIR + highestCard * Factor.TWO_PAIR)
                             * Improvment.PAIR_WITH_KICKER)
-                            + ((Odds.ONE_PAIR + firstCard  * Factor.ONE_PAIR)
+                            + ((Odds.ONE_PAIR + firstCard * Factor.ONE_PAIR)
                             * (1 - Improvment.PAIR_WITH_KICKER));
                 }
                 break;
@@ -230,29 +230,29 @@ public class Agent {
                 break;
             case Combination.PROJECT_STRAIGHT_OPEN:
                 if (round) {
-                    odd = (float) (highestCard  * Factor.HIGH_CARD);
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = (float) ((Odds.STRAIGHT + highestCard  * Factor.STRAIGHT)
+                    odd = (float) ((Odds.STRAIGHT + highestCard * Factor.STRAIGHT)
                             * Improvment.PROJECT_STRAIGHT_OPEN)
-                            + ((highestCard  * Factor.HIGH_CARD)
+                            + ((highestCard * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_STRAIGHT_OPEN));
                 }
                 break;
             case Combination.PROJECT_FLUSH_THREE:
                 if (round) {
-                    odd = (float) (highestCard  * Factor.HIGH_CARD);
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = (float) ((Odds.FLUSH + highestCard  * Factor.FLUSH)
+                    odd = (float) ((Odds.FLUSH + highestCard * Factor.FLUSH)
                             * Improvment.PROJECT_FLUSH_THREE)
-                            + ((highestCard  * Factor.HIGH_CARD)
+                            + ((highestCard * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_FLUSH_THREE));
                 }
                 break;
             case Combination.PROJECT_FLUSH_FOUR:
                 if (round) {
-                    odd = (float) (highestCard  * Factor.HIGH_CARD);
+                    odd = (float) (highestCard * Factor.HIGH_CARD);
                 } else {
-                    odd = (float) ((Odds.FLUSH + highestCard  * Factor.FLUSH)
+                    odd = (float) ((Odds.FLUSH + highestCard * Factor.FLUSH)
                             * Improvment.PROJECT_FLUSH_FOUR)
                             + ((highestCard * Factor.HIGH_CARD)
                             * (1 - Improvment.PROJECT_FLUSH_FOUR));

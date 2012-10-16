@@ -1,7 +1,5 @@
 package com.medicwave.cardgame.poker;
 
-import ca.ualberta.cs.poker.Hand;
-
 /**
  * Public for describing information about other player (interaction)
  *
@@ -22,13 +20,12 @@ public class OtherPlayer {
     // Fields
     // =========================================================================
     private String nameId = null;
-    private float probabilitiesOfWin = 0;
+    private int probabilitiesOfWin = 0;
     private int numberOfThrownCards = 0;
     private int chips = 0;
     private RoundStatistics roundStatistics = new RoundStatistics();
     private FullStatistics fullStatistics = new FullStatistics();
-    private boolean aggressive = false;
-    private float aggressiveCoefficient = (float) -1.0;
+    private Boolean aggressive = null;
 
     // =========================================================================
     // Constructor
@@ -61,22 +58,12 @@ public class OtherPlayer {
 
     public void reset() {
         this.numberOfThrownCards = 0;
+        this.probabilitiesOfWin = 0;
         this.roundStatistics = new RoundStatistics();
     }
 
     public void saveRoundStatistics() {
         fullStatistics.addRoundStatistics(roundStatistics);
-    }
-
-    public void calculateAggressiveCoefficient(Hand hand) {
-        Combination combination = new Combination(hand);
-        float probOfWin = (float) Agent.calculateProbabilityOfWin(combination, true);
-        int agentsLimit = Decision.calculateLimit(probOfWin, this.chips);
-        int playersLimit = roundStatistics.getChipsBetted();
-        if (playersLimit != 0) {
-            this.aggressiveCoefficient = (float) agentsLimit / playersLimit;
-            this.aggressive = this.aggressiveCoefficient < 1;
-        }
     }
 
     // =========================================================================
@@ -138,28 +125,21 @@ public class OtherPlayer {
     /**
      * @return the isAggressive
      */
-    public boolean isAggressive() {
+    public Boolean isAggressive() {
         return aggressive;
     }
 
     /**
      * @param isAggressive the isAggressive to set
      */
-    public void setIsAggressive(boolean aggressive) {
+    public void setIsAggressive(Boolean aggressive) {
         this.aggressive = aggressive;
     }
 
     /**
-     * @return the aggressiveCoefficient
+     * @return the probabilitiesOfWin
      */
-    public float getAggressiveCoefficient() {
-        return aggressiveCoefficient;
-    }
-
-    /**
-     * @param aggressiveCoefficient the aggressiveCoefficient to set
-     */
-    public void setAggressiveCoefficient(float aggressiveCoefficient) {
-        this.aggressiveCoefficient = aggressiveCoefficient;
+    public int getProbabilitiesOfWin() {
+        return probabilitiesOfWin;
     }
 }

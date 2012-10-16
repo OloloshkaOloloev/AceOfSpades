@@ -1,6 +1,7 @@
 package com.medicwave.cardgame.poker;
 
 import com.medicwave.cardgame.poker.PokerClientBase.BettingAnswer;
+import java.util.Random;
 
 /**
  * Class describes the decission(Raise, check , fold ,all-in) that agent has to
@@ -20,11 +21,15 @@ public class Decision {
     private static final float RANGE_95 = (float) 0.95;
     private static final float RANGE_97 = (float) 0.97;
     private static final float RANGE_98 = (float) 0.98;
-    private static final float RANGE_99 = (float) 0.938;
+    private static final float RANGE_99 = (float) 0.99;
+    // =========================================================================
+    // Fields
+    // =========================================================================
+    private static Random random = new Random();
+
     // =========================================================================
     // Constructor
     // =========================================================================
-
     public Decision() {
     }
 
@@ -41,14 +46,13 @@ public class Decision {
         } else if (playersRemainingChips < 2 * minimumPotAfterOpen && limit > 3 * stake) {
             return pokerClient.new BettingAnswer(BettingAnswer.ACTION_ALLIN);
         } else if (limit <= 5 * stake) {
-            if (limit < 2 * stake) {
+            if (limit < 3 * stake) {
                 return pokerClient.new BettingAnswer(BettingAnswer.ACTION_CHECK);
             } else {
-
                 return pokerClient.new BettingAnswer(playersCurrentBet <= limit
                         ? BettingAnswer.ACTION_OPEN : BettingAnswer.ACTION_CHECK,
                         3 * minimumPotAfterOpen + playersCurrentBet <= limit
-                        ? 3 * minimumPotAfterOpen : limit - playersCurrentBet);
+                        ? 3 * minimumPotAfterOpen + random.nextInt(limit - playersCurrentBet) : minimumPotAfterOpen);
             }
 
         } else {
@@ -56,7 +60,6 @@ public class Decision {
                     minimumPotAfterOpen + playersCurrentBet <= limit
                     ? BettingAnswer.ACTION_OPEN : BettingAnswer.ACTION_CHECK,
                     minimumPotAfterOpen);
-
         }
     }
 
@@ -70,8 +73,8 @@ public class Decision {
             return pokerClient.new BettingAnswer(BettingAnswer.ACTION_ALLIN);
         } else if (limit < stake) {
             return pokerClient.new BettingAnswer(BettingAnswer.ACTION_CHECK);
-        } else if (limit < 3 * stake) {
-            return pokerClient.new BettingAnswer(BettingAnswer.ACTION_OPEN, minimumPotAfterOpen);
+        } else if (limit < 2 * stake) {
+            return pokerClient.new BettingAnswer(BettingAnswer.ACTION_OPEN, minimumPotAfterOpen + random.nextInt(limit - playersCurrentBet));
         } else {
             return pokerClient.new BettingAnswer(
                     playersCurrentBet <= limit
@@ -84,15 +87,15 @@ public class Decision {
     public static BettingAnswer makeRaiseAction(PokerClient pokerClient, int limit, float probOfWin,
             int maximumBet, int minimumAmountToRaiseTo, int playersCurrentBet, int playersRemainingChips) {
         int stake = (playersCurrentBet + playersRemainingChips) / 10;
-        if (limit < minimumAmountToRaiseTo + playersCurrentBet) {
+        if (limit < minimumAmountToRaiseTo) {
             return pokerClient.new BettingAnswer(BettingAnswer.ACTION_FOLD);
         } else {
-            if (limit <= 2 * stake) {
+            if (limit <= 3 * stake) {
                 return pokerClient.new BettingAnswer(BettingAnswer.ACTION_CALL);
             } else {
                 return pokerClient.new BettingAnswer(BettingAnswer.ACTION_RAISE,
                         3 * minimumAmountToRaiseTo + playersCurrentBet < limit
-                        ? 3 * minimumAmountToRaiseTo : limit - playersCurrentBet);
+                        ? 3 * minimumAmountToRaiseTo + random.nextInt(playersCurrentBet) : minimumAmountToRaiseTo + random.nextInt(limit + playersCurrentBet));
             }
         }
 
@@ -133,7 +136,8 @@ public class Decision {
 
     /**
      * Recalculate limit in each turn considering pot and other players
-     * variables such as probability and chips
+     * variables such as probability and chips PROBABILITY IN METHOD IS
+     * CALCULATING TILL 100% !!! NOT TILL 1 !!!
      *
      * @param limit previous limit
      * @param chips amount of money of player
@@ -154,7 +158,7 @@ public class Decision {
                 return chips;
             }
         }
-        switch (otherPlayerProbability) {
+        switch ((int) otherPlayerProbability) {
             case OtherPlayer.DRAW_0: {
                 if (limit < 6 * stake) {
                     return 0;

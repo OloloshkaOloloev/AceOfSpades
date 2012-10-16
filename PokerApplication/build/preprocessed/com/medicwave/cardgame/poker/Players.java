@@ -11,11 +11,11 @@ public class Players {
     // Constants
     // =========================================================================
 
-    public static final int FIVE_PLAYERS = 5;
+    public static final int FOUR_OTHER_PLAYERS = 5;
     // =========================================================================
     // Fields
     // =========================================================================
-    private OtherPlayer[] players = new OtherPlayer[FIVE_PLAYERS - 1];
+    private OtherPlayer[] players = new OtherPlayer[FOUR_OTHER_PLAYERS];
 
     // =========================================================================
     // Constructors
@@ -38,28 +38,28 @@ public class Players {
     // Methods
     // =========================================================================
     public OtherPlayer getPlayer(String name) {
-        for(int i = 0; i < players.length; i++) {
-            if(players[i] != null && players[i].getPlayerName().equals(name)) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null && players[i].getPlayerName().equals(name)) {
                 return players[i];
             }
         }
         return null;
     }
-    
+
     public void saveRoundStatistics() {
-        for(int i = 0; i < players.length; i++) {
-            if(players[i] != null) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
                 players[i].saveRoundStatistics();
             }
         }
     }
-    
-    private void initIfNeeded(String player) {
+
+    private boolean initIfNeeded(String player) {
         // Finding if player was previously initialized
         for (int i = 0; i < players.length; i++) {
             if (players[i] != null) {
                 if (player.equals(players[i].getPlayerName())) {
-                    return; // player was initialized before
+                    return true; // player was initialized before
                 }
             }
         }
@@ -68,53 +68,125 @@ public class Players {
         for (int i = 0; i < players.length; i++) {
             if (players[i] == null) {
                 players[i] = new OtherPlayer(player);
+                return true;
             }
         }
+        return false; // There is no empty space in array
     }
-    
+
     public void resetPlayersInfo() {
-        for(int i = 0; i < players.length; i++) {
-            if(players[i] != null) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) {
                 players[i].reset();
             }
         }
     }
 
+    public void increaseChipsBetted(String player, int chipsBetted) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().increaseChipsBetted(chipsBetted);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void increaseRaises(String player) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().increaseRaises();
+                    return;
+                }
+            }
+        }
+    }
+
+    public void increaseChecks(String player) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().increaseChecks();
+                    return;
+                }
+            }
+        }
+    }
+    
+    public void increaseCalls(String player) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().increaseCalls();
+                    return;
+                }
+            }
+        }
+    }
+    
+    public void increaseFolds(String player) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().setFold(true);
+                    return;
+                }
+            }
+        }
+    }
+    
+    public void increaseAllIns(String player) {
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].getRoundStatistics().setAllIn(true);
+                    return;
+                }
+            }
+        }
+    }
+
     public void setCardsCountPlayerThrown(String player, int numberOfCards) {
-        initIfNeeded(player);
-        for (int i = 0; i < players.length; i++) {
-            if (player.equals(players[i].getPlayerName())) {
-                players[i].setNumberOfThrownCards(numberOfCards);
-                return;
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].setNumberOfThrownCards(numberOfCards);
+                    return;
+                }
             }
         }
     }
 
     public int getCardsCountPlayerThrown(String player) {
-        initIfNeeded(player);
-        for (int i = 0; i < players.length; i++) {
-            if (player.equals(players[i].getPlayerName())) {
-                return players[i].getNumberOfThrownCards();
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    return players[i].getNumberOfThrownCards();
+                }
             }
         }
         return 0;
     }
 
     public void setPlayersChips(String player, int chips) {
-        initIfNeeded(player);
-        for (int i = 0; i < players.length; i++) {
-            if (player.equals(players[i].getPlayerName())) {
-                players[i].setChips(chips);
-                return;
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    players[i].setChips(chips);
+                    return;
+                }
             }
         }
     }
 
     public int getPlayersChips(String player) {
-        initIfNeeded(player);
-        for (int i = 0; i < players.length; i++) {
-            if (player.equals(players[i].getPlayerName())) {
-                return players[i].getChips();
+        if (initIfNeeded(player)) {
+            for (int i = 0; i < players.length; i++) {
+                if (player.equals(players[i].getPlayerName())) {
+                    return players[i].getChips();
+                }
             }
         }
         return 0;

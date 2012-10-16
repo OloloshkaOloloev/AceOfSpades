@@ -1,5 +1,7 @@
 package com.medicwave.cardgame.poker;
 
+import java.util.Vector;
+
 /**
  * Class contains statistic for all rounds
  *
@@ -10,7 +12,7 @@ public class FullStatistics {
     // Fields
     // =========================================================================
 
-    private RoundStatistics[] statistics;
+    private RoundStatistics[] statistics = new RoundStatistics[0];
 
     // =========================================================================
     // Constructor
@@ -26,6 +28,24 @@ public class FullStatistics {
         System.arraycopy(statistics, 0, temp, 0, statistics.length);
         temp[statistics.length] = roundStatistics;
         statistics = temp;
+    }
+    
+    public Vector getFullStatisticsForTesting() {
+        Vector attributes = new Vector();
+        int checks = 0;
+        int raises = 0;
+        int calls = 0;
+        int folds = 0;
+        int allIns = 0;
+        for (int i = 0; i < statistics.length; i++) {
+            checks += statistics[i].getChecks();
+            raises += statistics[i].getRaises();
+            calls += statistics[i].getCalls();
+            folds += statistics[i].isFold() ? 1 : 0;
+            allIns += statistics[i].isAllIn() ? 1 : 0;
+        }
+        
+        return attributes;
     }
 
     public boolean isChecksMoreThanRaises() {
@@ -46,6 +66,26 @@ public class FullStatistics {
             raises += statistics[i].getRaises();
         }
         return calls > raises;
+    }
+    
+    public boolean isCallsMoreFolds() {
+        int calls = 0;
+        int folds = 0;
+        for (int i = 0; i < statistics.length; i++) {
+            calls += statistics[i].getCalls();
+            folds += statistics[i].isFold() ? 1 : 0;
+        }
+        return calls > folds;
+    }
+    
+    public boolean isRaisesMoreThanAllIns() {
+        int calls = 0;
+        int allIns = 0;
+        for (int i = 0; i < statistics.length; i++) {
+            calls += statistics[i].getCalls();
+            allIns += statistics[i].isAllIn() ? 1 : 0;
+        }
+        return calls > allIns;
     }
     
     public int getAllInsCount() {
